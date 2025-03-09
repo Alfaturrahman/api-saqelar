@@ -50,6 +50,15 @@ public class JwtFilter extends OncePerRequestFilter {
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 String token = authHeader.substring(7);
                 System.out.println("🔹 Extracted Token: " + token);
+
+                // 🔥 Cek apakah token sudah expired
+                if (jwtUtil.isTokenExpired(token)) {
+                    System.out.println("❌ Token Expired!");
+
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write("Token expired, please login again");
+                    return;
+                }
                 
                 String username = jwtUtil.extractUsername(token);
                 System.out.println("🔹 Extracted Username: " + username);

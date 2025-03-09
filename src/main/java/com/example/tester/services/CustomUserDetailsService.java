@@ -17,17 +17,17 @@ public class CustomUserDetailsService implements UserDetailsService {
     private UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> user = userRepository.findByUsername(username);
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Optional<User> user = userRepository.findByEmail(email);
         if (user.isEmpty()) {
             throw new UsernameNotFoundException("User not found");
         }
 
         User dbUser = user.get();
-        UserBuilder builder = org.springframework.security.core.userdetails.User.withUsername(dbUser.getUsername());
+        UserBuilder builder = org.springframework.security.core.userdetails.User.withUsername(dbUser.getEmail());
         builder.password(dbUser.getPassword());
 
-        // Role sudah ada di DB dalam format "ROLE_USER", langsung gunakan tanpa modifikasi
+        // Ambil role dari database
         String[] roles = dbUser.getRole().split(",");
         builder.roles(roles);
 
