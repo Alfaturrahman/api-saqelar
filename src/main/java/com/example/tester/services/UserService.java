@@ -58,22 +58,26 @@ public class UserService {
 
     public AuthResponseDTO loginUser(AuthRequestDTO request) {
         Optional<User> dbUser = userRepository.findByEmail(request.getEmail());
-
+    
         if (dbUser.isEmpty() || !passwordEncoder.matches(request.getPassword(), dbUser.get().getPassword())) {
-            return new AuthResponseDTO(null, "Invalid email or password");
+            return new AuthResponseDTO(null, "Invalid email or password", null, null);
         }
-
+    
         try {
             authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
         } catch (Exception e) {
-            return new AuthResponseDTO(null, "Authentication Error");
+            return new AuthResponseDTO(null, "Authentication Error", null, null);
         }
-
-        // Generate token
+    
+        // Generate JWT token
         String token = jwtUtil.generateToken(request.getEmail());
-
-        return new AuthResponseDTO(token, "Login Successful");
+    
+        // Ambil data user dari database
+        User user = dbUser.get();
+    
+        // Kembalikan token + data user
+        return new AuthResponseDTO(token, "Login Successful", user.getName(), user.getRole());
     }
 }
